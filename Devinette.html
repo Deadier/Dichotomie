@@ -52,6 +52,10 @@
     button:active {
       background: var(--btn-active-bg);
     }
+    .message {
+      text-align: center;
+      min-height: 1.5em;
+    }
     .config {
       margin-bottom: 2rem;
       border: 1px solid #ccc;
@@ -82,10 +86,12 @@
   <div class="panel main">
     <h2>Jeu de devinette</h2>
     <input type="number" id="guess-input" readonly>
+    <div id="message" class="message"></div>
     <div class="buttons">
       <button id="btn-less">- (plus petit)</button>
       <button id="btn-more">+ (plus grand)</button>
     </div>
+    <button id="restart-btn" style="display:none;">Nouvelle partie</button>
   </div>
 
   <script>
@@ -100,10 +106,35 @@
       const guessInput = document.getElementById('guess-input');
       const btnLess = document.getElementById('btn-less');
       const btnMore = document.getElementById('btn-more');
+      const message = document.getElementById('message');
+      const restartBtn = document.getElementById('restart-btn');
+
+      function showMessage(text, isError = false) {
+        message.textContent = text;
+        message.style.color = isError ? 'red' : 'green';
+      }
+
+      function resetGame() {
+        min = Number(minInput.value);
+        max = Number(maxInput.value);
+        btnLess.disabled = false;
+        btnMore.disabled = false;
+        restartBtn.style.display = 'none';
+        showMessage('');
+        updateGuess();
+      }
 
       function updateGuess() {
-        guess = Math.floor((min + max + 1) / 2);
-        guessInput.value = guess;
+        if (min === max) {
+          guessInput.value = min;
+          showMessage('Bravo ! Le nombre est ' + min);
+          btnLess.disabled = true;
+          btnMore.disabled = true;
+          restartBtn.style.display = 'block';
+        } else {
+          guess = Math.floor((min + max + 1) / 2);
+          guessInput.value = guess;
+        }
       }
 
       saveBtn.addEventListener('click', () => {
@@ -112,9 +143,9 @@
         if (!isNaN(newMin) && !isNaN(newMax) && newMin < newMax) {
           min = newMin;
           max = newMax;
-          updateGuess();
+          resetGame();
         } else {
-          alert('Veuillez saisir des bornes valides (min < max).');
+          showMessage('Veuillez saisir des bornes valides (min < max).', true);
         }
       });
 
@@ -122,7 +153,10 @@
         if (isHigher) min = guess + 1;
         else max = guess - 1;
         if (min > max) {
-          alert('Incohérence: plus de solution possible');
+          showMessage('Incohérence: plus de solution possible', true);
+          btnLess.disabled = true;
+          btnMore.disabled = true;
+          restartBtn.style.display = 'block';
           return;
         }
         updateGuess();
@@ -130,6 +164,7 @@
 
       btnLess.addEventListener('click', () => handleResponse(false));
       btnMore.addEventListener('click', () => handleResponse(true));
+      restartBtn.addEventListener('click', resetGame);
 
       updateGuess();
     });

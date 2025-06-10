@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeu de devinette de nombre par dichotomie</title>
+  <style>
+    :root {
+      --btn-bg: #007bff;
+      --btn-active-bg: #0056b3;
+    }
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+    .panel {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .main h2 {
+      text-align: center;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    input[type="number"] {
+      font-size: 2rem;
+      text-align: center;
+      padding: 0.5rem;
+    }
+    button {
+      font-size: 1.25rem;
+      padding: 0.75rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 0.25rem;
+      background: var(--btn-bg);
+      color: white;
+    }
+    button:active {
+      background: var(--btn-active-bg);
+    }
+    .config {
+      margin-bottom: 2rem;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+    .config input {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel config">
+    <h2>Configuration</h2>
+    <label for="min-input">
+      Borne inférieure :
+      <input type="number" id="min-input" value="0" min="0" max="10000">
+    </label>
+    <label for="max-input">
+      Borne supérieure :
+      <input type="number" id="max-input" value="10000" min="1" max="10000">
+    </label>
+    <button id="save-config">Enregistrer</button>
+  </div>
+
+  <div class="panel main">
+    <h2>Jeu de devinette</h2>
+    <input type="number" id="guess-input" readonly>
+    <div class="buttons">
+      <button id="btn-less">- (plus petit)</button>
+      <button id="btn-more">+ (plus grand)</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let min = Number(document.getElementById('min-input').value);
+      let max = Number(document.getElementById('max-input').value);
+      let guess = null;
+
+      const minInput = document.getElementById('min-input');
+      const maxInput = document.getElementById('max-input');
+      const saveBtn = document.getElementById('save-config');
+      const guessInput = document.getElementById('guess-input');
+      const btnLess = document.getElementById('btn-less');
+      const btnMore = document.getElementById('btn-more');
+
+      function updateGuess() {
+        guess = Math.floor((min + max + 1) / 2);
+        guessInput.value = guess;
+      }
+
+      saveBtn.addEventListener('click', () => {
+        const newMin = Number(minInput.value);
+        const newMax = Number(maxInput.value);
+        if (!isNaN(newMin) && !isNaN(newMax) && newMin < newMax) {
+          min = newMin;
+          max = newMax;
+          updateGuess();
+        } else {
+          alert('Veuillez saisir des bornes valides (min < max).');
+        }
+      });
+
+      function handleResponse(isHigher) {
+        if (isHigher) min = guess + 1;
+        else max = guess - 1;
+        if (min > max) {
+          alert('Incohérence: plus de solution possible');
+          return;
+        }
+        updateGuess();
+      }
+
+      btnLess.addEventListener('click', () => handleResponse(false));
+      btnMore.addEventListener('click', () => handleResponse(true));
+
+      updateGuess();
+    });
+  </script>
+</body>
+</html>
